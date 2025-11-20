@@ -56,7 +56,7 @@ public class LoanCalc {
         double payment = loan / n;
 
         // A reasonable upper bound
-        double maxPayment = loan * 2.0;
+        double maxPayment = loan * 2;
 
         double bestPayment = payment;
         double bestAbsBalance = Double.MAX_VALUE;
@@ -106,7 +106,7 @@ public class LoanCalc {
         // Choose initial lo and hi values, using similar considerations
         // to what we did in the brute force search.
         double lo = loan / n;
-        double hi = loan * 2.0;
+        double hi = loan * 2;
 
         double fLo = endBalance(loan, rate, n, lo);
         double fHi = endBalance(loan, rate, n, hi);
@@ -121,7 +121,7 @@ public class LoanCalc {
         while ((hi - lo) > epsilon) {
             iterationCounter++;
 
-            double mid = (lo + hi) / 2.0;
+            double mid = (lo + hi) / 2;
             double fMid = endBalance(loan, rate, n, mid);
 
             // If we hit the root exactly, we can stop
@@ -141,7 +141,7 @@ public class LoanCalc {
         }
 
         // Final approximation of the root (payment) is the midpoint
-        System.out.printf("About to return payment of  %.2f%n", (lo + hi) / 2.0);
-        return Math.floor((lo + hi) / 2.0);
+        System.out.printf("About to return payment of  %.2f%n", (lo + hi) / 2);
+        return Math.floor((lo + hi) / 2);
     }
 }
