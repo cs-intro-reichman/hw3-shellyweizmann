@@ -90,7 +90,7 @@ public class LoanCalc {
         }
 
         // Return the payment rounded to nearest integer, as the autograder expects
-        return Math.round(bestPayment);
+        return Math.floor(bestPayment);
 
     }
 
@@ -126,7 +126,7 @@ public class LoanCalc {
 
             // If we hit the root exactly, we can stop
             if (fMid == 0.0) {
-                return Math.round(mid);
+                return Math.floor(mid);
             }
 
             // Decide which half contains the root:
@@ -142,6 +142,6 @@ public class LoanCalc {
 
         // Final approximation of the root (payment) is the midpoint
         System.out.printf("About to return payment of  %.2f%n", (lo + hi) / 2.0);
-        return Math.round((lo + hi) / 2.0);
+        return Math.floor((lo + hi) / 2.0);
     }
 }
