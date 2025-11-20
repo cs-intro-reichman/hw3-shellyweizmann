@@ -43,10 +43,9 @@ public class LoanCalc {
        double balance = loan;
 
         // Loop through each period to find balance
-        for (int i = 0 ; i < n; i++) {
-            balance -= payment;               
-            balance += balance * (rate/100);  
-        }
+       for (int i = 0 ; i < n; i++) {
+    balance = (balance - payment) * (1 + rate/100);  
+}
         return balance;    
        
     }
