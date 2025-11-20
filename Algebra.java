@@ -32,92 +32,66 @@ public class Algebra {
 
 	// Returns x1 + x2
 	public static int plus(int x1, int x2) {
-		// Replace the following statement with your code
-
 		int result = x1;
-
-		for (int i=0; i < x2; i++) {
-			
-			 result++;
-		}
-		return result;
+        if (x2 >= 0) {
+            for (int i = 0; i < x2; i++) result++;
+        } else {
+            for (int i = 0; i < -x2; i++) result--;
+        }
+        return result;
 	}
 
 	// Returns x1 - x2
 	public static int minus(int x1, int x2) {
-		// Replace the following statement with your code
-		int result = x1;
-
-		for (int i=0; i < x2; i++) {
-			 result --;
-		}
-		return result;
+		return plus(x1, -x2);
 	}
 
 	// Returns x1 * x2
 	public static int times(int x1, int x2) {
-		// Replace the following statement with your code
-		int result = x1;
-		int loop = minus(x2, 1);
-
-		for (int i=0; i < loop; i++) {
-			 result = plus(result, x1);
-		}
+		 int result = 0;
+        boolean negative = false;
+        if (x2 < 0) { x2 = -x2; negative = true; }
+        for (int i = 0; i < x2; i++) result = plus(result, x1);
+        if (negative) result = -result;
 		return result;
 	}
 
 	// Returns x^n (for n >= 0)
 	public static int pow(int x, int n) {
-		// Replace the following statement with your code
-		
-		//int result = 0;
-		int loop = minus(n, 1);
-		int result=x;
-
-		for (int i=0; i < loop; i++) {
-			 result = times(result, x);
-		}
-		return result;
+		    if (n == 0) return 1;
+        int result = 1;
+        for (int i = 0; i < n; i++) result = times(result, x);
+        return result;
 		
 	}
 
 	// Returns the integer part of x1 / x2 
 	public static int div(int x1, int x2) {
-		// Replace the following statement with your code
-		int result = x1;
-		int iterations = 0;
+	if (x2 == 0) throw new ArithmeticException("Division by zero");
+        boolean negative = (x1 < 0) ^ (x2 < 0); 
+        x1 = Math.abs(x1);
+        x2 = Math.abs(x2);
 
-		while (minus(result, x2)>=0) {
-			
-			result = minus (result, x2);
-			iterations++;
-			//System.out.println("iteration: " + iterations + " result: " + result);
-
-		}
-
-		return iterations;
+        int count = 0;
+        while (x1 >= x2) {
+            x1 = minus(x1, x2);
+            count++;
+        }
+        return negative ? -count : count;
 	}
 
 	// Returns x1 % x2
 	public static int mod(int x1, int x2) {
-		// Replace the following statement with your code
-		int divResult=div(x1, x2);
-		int multResult=times(x2, divResult);
-		int modResult=minus(x1, multResult);
-
-		return modResult;
+		  if (x2 == 0) throw new ArithmeticException("Modulo by zero");
+        int remainder = minus(x1, times(div(x1, x2), x2));
+        if (x1 < 0 && remainder != 0) remainder = plus(remainder, x2);
+        return remainder;
 	}	
 
 	// Returns the integer part of sqrt(x) 
 	public static int sqrt(int x) {
-		// Replace the following statement with your code
-		int result = 1;
-		while(times(result,result) < x){
-			result++; 
-		}
-		if(times(result,result) == x){
-			return result;
-		}
-		return -1;
+        int result = 0;
+        while (times(result + 1, result + 1) <= x) result++;
+        return result;
 	}	  	  
 }

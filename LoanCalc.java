@@ -9,7 +9,7 @@ public class LoanCalc {
         double loan = Double.parseDouble(args[0]);
 		double rate = Double.parseDouble(args[1]);
 		int n = Integer.parseInt(args[2]);
-		double epsilon = Double.parseDouble(args[3]);
+		double epsilon = 0.001;
 
 		// First try the Brute Force Alogrith
         double payment = sequentialApprox(loan, rate, n, epsilon);
