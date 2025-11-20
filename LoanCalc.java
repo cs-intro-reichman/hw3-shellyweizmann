@@ -1,147 +1,72 @@
 // Computes the periodical payment necessary to pay a given loan.
 public class LoanCalc {
 
-    //static so all functions can use it
-    static int iterationCounter = 0;
+    static double epsilon = 0.001;   // Approximation accuracy
+    static int iterationCounter;     // Number of iterations
 
+    // Gets the loan data and computes the periodical payment.
     public static void main(String[] args) {
 
+        // Expects: loan amount (double), interest rate (double as percent), periods (int)
         double loan = Double.parseDouble(args[0]);
         double rate = Double.parseDouble(args[1]);
         int n = Integer.parseInt(args[2]);
-        double epsilon = 0.001;
 
-        // First try the Brute Force Algorithm
-        double payment = sequentialApprox(loan, rate, n, epsilon);
-        double finalBalance = endBalance(loan, rate, n, payment);
-        System.out.printf("BRUTE FORCE: Best payment found: %.0f%n", payment);
-        System.out.printf("Final balance after %d payments: %.4f%n", n, finalBalance);
-        System.out.printf("iteration Counter: %d%n", iterationCounter);
+        System.out.println("Loan = " + loan + ", interest rate = " + rate + "%, periods = " + n);
 
-        // Then try bi-section search
-        double newPayment = bisectionSearch(loan, rate, n, epsilon);
-        finalBalance = endBalance(loan, rate, n, newPayment);
-        System.out.printf("BI-SECTION: Best payment found: %.0f%n", newPayment);
-        System.out.printf("Final balance after %d payments: %.4f%n", n, finalBalance);
-        System.out.printf("iteration Counter: %d%n", iterationCounter);
+        // Computes the periodical payment using brute-force search
+        System.out.print("\nPeriodical payment, using brute force: ");
+        System.out.println((int) bruteForceSolver(loan, rate, n, epsilon));
+        System.out.println("number of iterations: " + iterationCounter);
 
+        // Computes the periodical payment using bi-section search
+        System.out.print("\nPeriodical payment, using bi-section search: ");
+        System.out.println((int) bisectionSolver(loan, rate, n, epsilon));
+        System.out.println("number of iterations: " + iterationCounter);
     }
 
-    // Given an initial balance, interest rate, number of payments and payment amount
-    // return the balance at the end of the payment period
-    static double endBalance(double loan,
-                             double rate,
-                             int n,
-                             double payment) {
-
+    // Computes the ending balance of a loan
+    private static double endBalance(double loan, double rate, int n, double payment) {
         double balance = loan;
-
-        // Loop through each period to find balance
         for (int i = 0; i < n; i++) {
-            balance = (balance - payment) * (1 + rate / 100);
+            balance = (balance - payment) * (1 + (rate / 100));
         }
         return balance;
-
     }
 
-    /*1. BRUTE FORCE APPROACH - Simulate the loan balance given a candidate payment
-      2. Scan possible payments from a low value upward in small steps (epsilon).
-      3. Keep the payment that leaves a final balance closest to zero*/
-    static double sequentialApprox(double loan,
-                                   double ratePerPeriod,
-                                   int n,
-                                   double epsilon) {
-
-        // set the initial guess of the brute force to g = loan/n.
-        double payment = loan / n;
-
-        // A reasonable upper bound
-        double maxPayment = loan * 2;
-
-        double bestPayment = payment;
-        double bestAbsBalance = Double.MAX_VALUE;
-
-        // Reset iteration counter
+    // Sequential brute-force approximation
+    public static double bruteForceSolver(double loan, double rate, int n, double epsilon) {
+        double guess = loan / n;        // Initial guess
         iterationCounter = 0;
 
-        // Compute the number of steps explicitly to avoid floating-point issues
-        int maxSteps = (int) ((maxPayment - payment) / epsilon);
-        for (int step = 0; step <= maxSteps; step++) {
-
-            double balance = endBalance(loan, ratePerPeriod, n, payment);
-            double absBalance = Math.abs(balance);
-
-            // If this candidate gives a better (closer to zero) balance, remember it
-            // we need this because we may never actually be within epsilon of 0, and if we
-            // don't remember which value brought us closest, we will just end up with the last one checked
-            if (absBalance < bestAbsBalance) {
-                bestAbsBalance = absBalance;
-                bestPayment = payment;
-            }
-
-            // If we are already within epsilon of zero balance, we can stop early
-            if (absBalance <= epsilon) {
-                break;
-            }
-
-            // Move to the next candidate payment
-            payment += epsilon;
+        while (endBalance(loan, rate, n, guess) > 0) {
+            guess = guess + epsilon;
             iterationCounter++;
         }
 
-        // Return the payment rounded to nearest integer, as the autograder expects
-        return Math.floor(bestPayment);
-
+        return guess;
     }
 
-    static double bisectionSearch(double loan,
-                                  double rate,
-                                  int n,
-                                  double epsilon) {
+    // Bisection search solver
+    public static double bisectionSolver(double loan, double rate, int n, double epsilon) {
 
-        // Reset the iteration counter
         iterationCounter = 0;
 
-        // ----- 1. Choose initial lo and hi -----
-        // Choose initial lo and hi values, using similar considerations
-        // to what we did in the brute force search.
         double lo = loan / n;
-        double hi = loan * 2;
+        double hi = loan;
+        double mid = (lo + hi) / 2;
 
-        double fLo = endBalance(loan, rate, n, lo);
-        double fHi = endBalance(loan, rate, n, hi);
-
-        // We need f(lo) and f(hi) to have opposite signs
-        if (fLo * fHi > 0) {
-            throw new IllegalStateException(
-                    "Bisection requires endBalance(lo) and endBalance(hi) to have opposite signs");
-        }
-
-        // ----- 2. Bisection loop -----
-        while ((hi - lo) > epsilon) {
-            iterationCounter++;
-
-            double mid = (lo + hi) / 2;
-            double fMid = endBalance(loan, rate, n, mid);
-
-            // If we hit the root exactly, we can stop
-            if (fMid == 0.0) {
-                return Math.floor(mid);
-            }
-
-            // Decide which half contains the root:
-            // If f(mid) has the same sign as f(lo), root is between mid and hi
-            if (fMid * fLo > 0) {
+        while (hi - lo > epsilon) {
+            if (endBalance(loan, rate, n, mid) * endBalance(loan, rate, n, lo) > 0) {
                 lo = mid;
-                fLo = fMid; // update f(lo) to avoid recomputing
             } else {
                 hi = mid;
-                fHi = fMid; // update f(hi)
             }
+            mid = (lo + hi) / 2;
+            iterationCounter++;
         }
 
-        // Final approximation of the root (payment) is the midpoint
-        System.out.printf("About to return payment of  %.2f%n", (lo + hi) / 2);
-        return Math.floor((lo + hi) / 2);
+        return mid;
     }
 }
+
